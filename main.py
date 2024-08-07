@@ -1,9 +1,10 @@
-import typer as t
-from art import text2art
-from termcolor import colored
+import typer as t #pip install typer
+from art import text2art #pip install art
+from termcolor import colored #pip install termcolor
 import os
 from pathlib import Path
-
+from docx import Document #pip install python-docx
+import docx2txt   #pip install docx2txt
 
 app=t.Typer()
 
@@ -69,16 +70,19 @@ def honeytoken_deploy():
     t.echo(colored("\t\t-[","green") + colored(".ini ","magenta")+ colored("]-  Initialization File","green"))
     t.echo(colored("\t\t-[","green") + colored(".docx","magenta")+ colored("]-  Microsoft Word Document (Open XML Document)","green"))
     t.echo(colored("\t\t-[","green") + colored(".sql ","magenta")+ colored("]-  Structured Query Language File","green"))
-    t.echo(colored("\t\t-[","green") + colored(".db  ","magenta")+ colored("]-  Database File","green"))
+    t.echo(colored("\t\t-[","green") + colored(".pem ","magenta")+ colored("]-  Privacy Enhanced Mail File","green"))
     t.echo(colored("\t\t-[","green") + colored(".env ","magenta")+ colored("]-  Environment File","green"))
     t.echo(colored("\t\t-[","green") + colored(".json","magenta")+ colored("]-  JavaScript Object Notation File","green"))
     t.echo(colored("\t\t-[","green") + colored(".log ","magenta")+ colored("]-  Log File","green"))
 
     while True:
-        f_name=input("File name (with extension): ")
+        f_name=input("\nFile name (with extension): ")
         ext=Path(f_name).suffix
-        if ext in [".txt",".conf",".ini",".sql",".log"]:
+        if ext in [".txt",".conf",".ini",".sql",".log",".pem",".env",".json"]:
             f_create(f_name,path)
+            break
+        elif ext == ".docx":
+            docx(f_name,path)
             break
         else:
             t.echo(colored("\n\t\tUnsupported file format\n","yellow"))
@@ -161,6 +165,55 @@ INSERT INTO users (username, password, email) VALUES
 [2024-08-07 10:10:00] WARN - Deprecated API used in request: GET /api/v1/old-endpoint
 [2024-08-07 10:15:00] ERROR - Unexpected token in JSON response from API
 """
+    elif ext == ".pem":                    #For Privacy Enhanced Mail File
+        default="""-----BEGIN CERTIFICATE-----
+MIIDXTCCAkWgAwIBAgIJAKP4KVIePu1jMA0GCSqGSIb3DQEBCwUAMEUxCzAJBgNV
+BAYTAkFVMSUwIwYDVQQKExxJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGQuMRcwFQYD
+VQQDEw5teXNpdGUuY29tLmF1MB4XDTIxMDkxMDEyMjk1NloXDTIxMTAxMDEyMjk1
+NlowRTELMAkGA1UEBhMCQVUxJTAjBgNVBAoTHEludGVybmV0IFdpZGdpdHMgUHR5
+IEx0ZC4xFzAVBgNVBAMTDm15c2l0ZS5jb20uYXUwggEiMA0GCSqGSIb3DQEBAQUA
+A4IBDwAwggEKAoIBAQC9jTY3QHxu6jCqJl/1KrVv6xL6p/kNfnVGZjWY8C3kXUFA
+ry7X2ZKJ/vlgEcv37V4wDwKsV6GtnH0vPd1l1yRQWMoW4ICgKyn5yAj7h2fZcEGH
+LfDP4Bq9mv+vPcy1jEIJW9qAK9wFyQPoCmf7hTyzRPw4UP9z3eYfT6bT+F6lSAtf
+AGnDd27uLFe/UX8PBKEmHUpEvhq6B+VkDImll1MeYX/fQvY3LQZxTVVsaSRJ18tb
+LZ6+OzLp/klC5l0mI+zSi+brarO/uyjqykvcmkkM4QpNc4QIlgGTcTkcA7mCeSKj
+/gzKbQXe1Jb4Am4BAkB8OsU9ZY5h3GyK8jlmXv0TAgMBAAGjUDBOMB0GA1UdDgQW
+BBTm5nrGf5/3ylLCs2L96Kv8g6MaJTAfBgNVHSMEGDAWgBTm5nrGf5/3ylLCs2L9
+6Kv8g6MaJTAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBCwUAA4IBAQBCfA74J4PT
+rSbOvE8Rk00h5aX3W36kP5UKn6X5vv+7TkTmM3mHg3Zg0Tj6GiZ9Jg4/P+Gb1U+e
+nkAr6xnPgg1JFXZqwq45lvhKXl6ZWUtN3sYeC2CCKfLZjdyNJnSxJ1h/jwllBy+j
+WDB0+eDH9+DpO/6aaeb4qU5kzFeH0dIv2yIDTYEYHZDWoSmNfGmTwhHC6Y+VmD32
+Qb6bTq2X9eC1vYbh9/cP0YeXl5P4OqZwqE5jMBH7pJX5HCx0Gxv1r/pycUikXyRa
+1kBlSTyWKNmrm7DF0NQl4sTnMmSwQ0sFZMHXt6BjBn5KO9QDQ9PXlfk+yKGoXvOs
+KdjDxeONF8Zk
+-----END CERTIFICATE-----
+"""
+    elif ext == ".env":                    #For Environment File
+        default="""# Environment Variables
+
+DATABASE_URL=postgres://dbuser:dbpass@db.example.com:5432/mydatabase
+SECRET_KEY=supersecretkey12345
+DEBUG=True
+API_KEY=12345-abcde-67890-fghij
+"""
+    elif ext ==".json":                   #For JavaScript Object Notation File
+        default="""{
+    "database": {
+        "host": "db.example.com",
+        "port": 5432,
+        "username": "dbuser",
+        "password": "dbpass"
+    },
+    "server": {
+        "host": "0.0.0.0",
+        "port": 8080
+    },
+    "logging": {
+        "level": "INFO",
+        "file": "/var/log/application.log"
+    }
+}
+"""
 
     try:                                       #To create the file
         with open(path/f_name,"w+") as file:
@@ -175,10 +228,11 @@ INSERT INTO users (username, password, email) VALUES
                     break
                 elif ct == "-c":
                     file.write(custom())
-                    t.echo("\nFile created\nFile content:\n")
+                    t.echo(colored("\n\tFile created\nFile content:\n","blue"))
                     file.seek(0)
                     c=file.read()
                     t.echo(c)
+                    t.echo("\n")
                     break
                 else:
                     t.echo(colored("\n\t\tInvalid input\n","yellow"))
@@ -187,10 +241,58 @@ INSERT INTO users (username, password, email) VALUES
         
 
 
+def docx(f_name,path):
+    doc=Document()
+    t.echo(colored("\n\t\t-[","green") + colored("-d","magenta") + colored("]- for default content"))
+    t.echo(colored("\t\t-[","green") + colored("-c","magenta") + colored("]- for custom content\n"))
+    while True:
+        ct=input("Select one: ")
+        if ct == "-d":
+            doc.add_heading('Confidential Report', level=1)
+            con="""
+Date: August 7, 2024
 
-        
-def custom():                                #To get the customized input from the user to add in the file
-    t.echo("Enter your custom content (type '-END' on a new line to finish)\n")
+Project Name: New Initiative
+
+Executive Summary:
+The project aims to revolutionize our approach to data management, enhancing security and efficiency.
+
+Key Findings:
+- Significant improvements in data processing times.
+- Enhanced security protocols.
+
+Recommendations:
+1. Implement updated encryption methods.
+2. Conduct a thorough audit of current practices.
+
+Contact Information:
+John Doe
+Chief Technology Officer
+Email: john.doe@example.com
+"""
+            doc.add_paragraph(con)
+            break
+        elif ct=="-c":
+            t.echo(colored("\n\t\tGive the heading (In one line)","blue"))
+            head=input()
+            doc.add_heading(head,level=1)
+            doc.add_paragraph(custom())
+            break
+        else:
+            t.echo(colored("\n\t\tInvalid input\n","yellow"))
+    try:
+        doc_path=path/f_name
+        doc.save(doc_path)
+        t.echo(colored("\n\tFile created\nFile content:\n","blue"))
+        txt=docx2txt.process(doc_path)
+        t.echo(txt,"\n")
+    except Exception as e:
+        t.echo(colored("An error occurred: ","yellow") + colored(e,"red"))
+            
+
+
+def custom():                        #To get the customized input from the user to add in the file
+    t.echo(colored("\n\tEnter your custom content (type '-END' on a new line to finish)\n","blue"))
     lines=[]
     while True:
         l=input()
@@ -201,9 +303,12 @@ def custom():                                #To get the customized input from t
     return '\n'.join(lines)
 
 
+
 @app.command()
 def line():
     intractive_mode()
+
+
 
 def help():
     t.echo("\n\nhelping\n\n")
