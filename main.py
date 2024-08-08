@@ -221,7 +221,7 @@ API_KEY=12345-abcde-67890-fghij
                 ct=input("Select one: ")
                 if ct == "-d":
                     file.write(default)
-                    t.echo("\nFile created\nFile content:\n")
+                    t.echo(colored("\n\tFile created\nFile content:\n","blue"))
                     file.seek(0)
                     c=file.read()
                     t.echo(c)
