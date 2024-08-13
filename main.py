@@ -2,9 +2,6 @@ import typer as t #pip install typer
 from art import text2art #pip install art
 from termcolor import colored #pip install termcolor
 import os
-from pathlib import Path
-from docx import Document #pip install python-docx
-import docx2txt   #pip install docx2txt
 import deploy
 
 app=t.Typer()
@@ -42,15 +39,15 @@ def pre_info():   #Info displayed at the beging of the tool
 
 
 
+def help():
+    t.echo("\n\nhelping\n\n")
+
 
 @app.command()
 def line():
     intractive_mode()
 
 
-
-def help():
-    t.echo("\n\nhelping\n\n")
 
 
 if __name__ == "__main__":
