@@ -3,6 +3,7 @@ from art import text2art #pip install art
 from termcolor import colored #pip install termcolor
 import os
 import deploy
+import monitor
 
 app=t.Typer()
 
@@ -15,6 +16,12 @@ def intractive_mode():
             help()
         elif command == "-deploy":
             deploy.honeytoken_deploy()
+        elif command == "-start":
+            monitor.start_monitoring()
+        elif command == "-stop":
+            monitor.stop_monitoring()
+        elif command == "-status":
+            monitor.check_monitoring_status()
         elif command.lower() == "exit":
             break
         else:
