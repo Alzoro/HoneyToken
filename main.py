@@ -22,6 +22,10 @@ def intractive_mode():
             monitor.stop_monitoring()
         elif command == "-status":
             monitor.check_monitoring_status()
+        elif command == "-chgadmin":
+            monitor.change_admin()
+        elif command == "-pid":
+            monitor.pid()
         elif command.lower() == "exit":
             break
         else:
@@ -41,7 +45,8 @@ def pre_info():   #Info displayed at the beging of the tool
     -[Help you stay ahead of threats and fortify your defenses]-
     """
     t.echo(colored(te,color="green"))
-    t.echo(colored("\t\t< ","green") + colored("-help ","yellow") + colored("for help or '","green" ) + colored("exit","yellow") + colored("' to quit >\n","green"))
+    t.echo(colored("\n   - Once monitoring begins, the program will automatically exit. -\n","yellow"))
+    t.echo(colored("\t\t< ","green") + colored("-help ","magenta") + colored("for help or '","green" ) + colored("exit","magenta") + colored("' to quit >\n","green"))
 
 
 
