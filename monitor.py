@@ -3,6 +3,7 @@ import typer as t   #pip install typer
 from termcolor import colored #pip install termcolor
 import subprocess
 import time
+from pathlib import Path
 import pickle
 import signal
 from watchdog.observers import Observer    #pip install watchdog
@@ -10,8 +11,16 @@ from watchdog.events import FileSystemEvent, FileSystemEventHandler
 
 state_log='/home/jones/Minor/h.monitor_state.pkl'
 admin='jones'
-path='/home/jones/Minor'
+final_path='/home/jones/Minor'
 f_pid=0
+
+def change_admin():
+    t.echo(colored("\n\tAdmin name will reset to default after exiting the program.\n","yellow"))
+    t.echo(colored("\nCurrent admin: ",'yellow') + colored(f"{admin}\n","green"))
+    new=input("New admin: ")
+    admin=new
+
+
 
 def get_usr(path):
     try:
@@ -28,7 +37,7 @@ def get_usr(path):
 
 class Honeytoken(FileSystemEventHandler):
     def process_event(self, event):
-        user=get_usr(path)
+        user=get_usr(final_path)
         if user and user != admin:
             t.echo(f"\n{event.src_path}\n")
             t.echo("\n\t\tAlert\n")
@@ -62,22 +71,47 @@ def monitor_honeytoken(f_path):
 
 
 def start_monitoring():
-    path=input("Path of the directory (without file name): ")
-    fn=input("File name: ")
-    f_path=os.path.join(path,fn)
+    while True:
+        while True:
+            p_input=input("Path of the directory (without file name): ")
+            path=Path(p_input)
 
-    pid=os.fork()
-    time.sleep(4)
-    if pid == 0:
-        with open(state_log,"wb") as f:
-            pickle.dump({'Monitoring':True, 'path':f_path, 'pid':os.getpid()},f)
-        
-        f_pid=os.getpid()
-        monitor_honeytoken(f_path)
+            if p_input == "exit":
+                break
 
-    else:
-        t.echo(colored(f"\nMonitoring started in background\n","blue"))
-        os._exit(0)
+            if path.is_dir():
+                if path.is_absolute():
+                    final_path = p_input
+                    break
+                else:
+                    t.echo(colored("\n\t\tPlease provide the absolute directory\n","yellow"))
+            else:
+                t.echo(colored("\n\t\tPlease provide a valid directory\n","yellow"))
+
+        while True:
+            fn=input("File name: ")
+
+            if Path(fn).suffix() in ['txt','conf','ini','docx','sql','pem','env','json','log']:
+                f_path=os.path.join(p_input,fn)
+                break
+            else:
+                t.echo(colored("\n\t\tPlease provide a valid file name\n","yellow"))
+
+        if os.path.exists(f_path):
+            pid=os.fork()                             #start of daemon process
+            time.sleep(4)
+            if pid == 0:
+                with open(state_log,"wb") as f:
+                    pickle.dump({'Monitoring':True, 'path':f_path, 'pid':os.getpid()},f)
+                
+                f_pid=os.getpid()
+                monitor_honeytoken(f_path)
+
+            else:
+                t.echo(colored(f"\nMonitoring started in background\n","blue"))
+                os._exit(0)
+        else:
+            t.echo(colored("\n\tNo such file found at the path\n\tPlease provide an existing file path, or use ","yellow") + colored("-deploy ","magenta") + colored("to create one\n","yellow"))
 
 
 def stop_monitoring():
@@ -125,3 +159,20 @@ def check_monitoring_status():
             os.remove(state_log)
     else:
         t.echo(colored("\nNo monitoring state file found\n","yellow"))
+
+
+def pid():
+    if os.path.exists(state_log):
+        try:
+            if os.path.getsize(state_log) != 0:
+                with open(state_log,"rb") as f:
+                    state = pickle.load(f)
+                    p=state.get('pid')
+                    t.echo(colored("\nMonitoring Process ID: ","blue") + colored(f"{p}\n","yellow") )
+            else:
+                t.echo(colored("\nMonitoring is not active\n","blue"))
+        except (EOFError , pickle.UnpicklingError):
+            t.echo(colored("\nState file is empty or corrupted.\n","yellow"))
+            os.remove(state_log)
+    else:
+        t.echo(colored("\nNo monitoring details found\n","yellow"))
