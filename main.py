@@ -1,7 +1,6 @@
 import typer as t #pip install typer
 from art import text2art #pip install art
 from termcolor import colored #pip install termcolor
-import os
 import deploy
 import monitor
 
