@@ -5,14 +5,16 @@ import subprocess
 import time
 from pathlib import Path
 import pickle
+from datetime import datetime
 import signal
 from watchdog.observers import Observer    #pip install watchdog
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
 
 state_log='/home/jones/Minor/h.monitor_state.pkl'
 admin='jones'
-final_path='/home/jones/Minor'
+path=""
 f_pid=0
+log_path="/home/jones/Minor/HoneyToken/log_status.log"
 
 def change_admin():
     t.echo(colored("\n\tAdmin name will reset to default after exiting the program.\n","yellow"))
@@ -21,28 +23,41 @@ def change_admin():
     admin=new
 
 
-
-def get_usr(path):
+def get_usr(path):   
     try:
-        res=subprocess.run(['lsof',path], capture_output=True, text=True)
+        res=subprocess.run(["sudo lsof -e /run/user/1000/gvfs -e /run/user/1000/doc --",path], capture_output=True, text=True, shell=True)
         for line in res.stdout.splitlines():
             if path in line:
                 p=line.split()
-                user=p[2]
-                return user
+                return p[2]
     except Exception as e:
-        t.echo(colored("Error getting file user:","yellow") + colored(e,"red"))
+            print(e)
     return None
+
+
+
+
+def add_log(user, event, path):
+    with open(log_path,"a") as f:
+        time=datetime.now().strftime('%d-%m-%Y %H:%M:%S')
+        f.write(f"\n{time} Event- {event} by {user} in {path}")
+
 
 
 class Honeytoken(FileSystemEventHandler):
     def process_event(self, event):
-        user=get_usr(final_path)
-        if user and user != admin:
-            t.echo(f"\n{event.src_path}\n")
-            t.echo("\n\t\tAlert\n")
+        f_path=event.src_path
+        t.echo(f"\n\t{f_path}\n")
+        global path
+        user=get_usr(path)
+        add_log(user,event.event_type,event.src_path)
+        if user:
+            if user != admin:
+                t.echo("\n\t\tAlert\n")
+            else:
+                t.echo("\n\t\tSuccess\n")
         else:
-            t.echo("\n\t\tSuccess\n")
+            t.echo("\nError\n")
 
     def on_modified(self, event):
         self.process_event(event)
@@ -55,6 +70,8 @@ class Honeytoken(FileSystemEventHandler):
 
     def on_opened(self, event):
         self.process_event(event)
+
+
 
 def monitor_honeytoken(f_path):
     e_handle=Honeytoken()
@@ -71,17 +88,17 @@ def monitor_honeytoken(f_path):
 
 
 def start_monitoring():
+    f_path=''
     while True:
         while True:
-            p_input=input("Path of the directory (without file name): ")
-            path=Path(p_input)
-
-            if p_input == "exit":
+            global path
+            path=input("Path of the directory (without file name): ")
+            p_input=Path(path)
+            if path == "exit":
                 break
 
-            if path.is_dir():
-                if path.is_absolute():
-                    final_path = p_input
+            if p_input.is_dir():
+                if p_input.is_absolute():
                     break
                 else:
                     t.echo(colored("\n\t\tPlease provide the absolute directory\n","yellow"))
@@ -91,7 +108,7 @@ def start_monitoring():
         while True:
             fn=input("File name: ")
 
-            if Path(fn).suffix() in ['txt','conf','ini','docx','sql','pem','env','json','log']:
+            if Path(fn).suffix in ['.txt','.conf','.ini','.docx','.sql','.pem','.env','.json','.log']:
                 f_path=os.path.join(p_input,fn)
                 break
             else:
@@ -99,7 +116,7 @@ def start_monitoring():
 
         if os.path.exists(f_path):
             pid=os.fork()                             #start of daemon process
-            time.sleep(4)
+            time.sleep(3)
             if pid == 0:
                 with open(state_log,"wb") as f:
                     pickle.dump({'Monitoring':True, 'path':f_path, 'pid':os.getpid()},f)
@@ -110,6 +127,7 @@ def start_monitoring():
             else:
                 t.echo(colored(f"\nMonitoring started in background\n","blue"))
                 os._exit(0)
+            break
         else:
             t.echo(colored("\n\tNo such file found at the path\n\tPlease provide an existing file path, or use ","yellow") + colored("-deploy ","magenta") + colored("to create one\n","yellow"))
 
@@ -176,3 +194,5 @@ def pid():
             os.remove(state_log)
     else:
         t.echo(colored("\nNo monitoring details found\n","yellow"))
+
+
