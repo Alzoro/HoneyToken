@@ -209,4 +209,4 @@ def pid():
             t.echo(colored("\nState file is empty or corrupted.\n","yellow"))
             os.remove(state_log)
     else:
-        t.echo(colored("\nNo monitoring details found\n","yellow"))
+        t.echo(colored("\nMonitoring is not active\n","yellow"))
