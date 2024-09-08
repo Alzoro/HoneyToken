@@ -10,10 +10,10 @@ def honeytoken_deploy():
 
     while True:
         p_input=input("Specify the path (absolute path): ")
-        path=Path(p_input)
-
-        if p_input == "exit":
-            break
+        if p_input.lower() == "exit":
+            return 0
+        else:
+            path=Path(p_input)
 
         if not path.is_absolute():
             t.echo(colored("\n\t\tPlease provide the absolute path\n","yellow"))
@@ -45,15 +45,18 @@ def honeytoken_deploy():
 
     while True:
         f_name=input("\nFile name (with extension): ")
-        ext=Path(f_name).suffix
-        if ext in [".txt",".conf",".ini",".sql",".log",".pem",".env",".json"]:
-            f_create(f_name,path)
-            break
-        elif ext == ".docx":
-            docx(f_name,path)
-            break
+        if f_name.lower() == "exit":
+            return 0
         else:
-            t.echo(colored("\n\t\tUnsupported file format\n","yellow"))
+            ext=Path(f_name).suffix
+            if ext in [".txt",".conf",".ini",".sql",".log",".pem",".env",".json"]:
+                f_create(f_name,path)
+                break
+            elif ext == ".docx":
+                docx(f_name,path)
+                break
+            else:
+                t.echo(colored("\n\t\tUnsupported file format\n","yellow"))
         
 
 
@@ -202,6 +205,8 @@ API_KEY=12345-abcde-67890-fghij
                     t.echo(c)
                     t.echo("\n")
                     break
+                elif ct.lower() == "exit":
+                    return 0
                 else:
                     t.echo(colored("\n\t\tInvalid input\n","yellow"))
     except Exception as e:
@@ -215,7 +220,9 @@ def docx(f_name,path):
     t.echo(colored("\t\t-[","green") + colored("-c","magenta") + colored("]- for custom content\n"))
     while True:
         ct=input("Select one: ")
-        if ct == "-d":
+        if ct.lower() == "exit":
+            return 0
+        elif ct == "-d":
             doc.add_heading('Confidential Report', level=1)
             con="""
 Date: August 7, 2024
@@ -260,7 +267,7 @@ Email: john.doe@example.com
 
 
 def custom():                        #To get the customized input from the user to add in the file
-    t.echo(colored("\n\tEnter your custom content (type '-END' on a new line to finish)\n","blue"))
+    t.echo(colored("\n\tEnter your custom content (type '-END' in new line to finish)\n","blue"))
     lines=[]
     while True:
         l=input()
