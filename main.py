@@ -21,14 +21,12 @@ def intractive_mode():
             monitor.stop_monitoring()
         elif command == "-status":
             monitor.check_monitoring_status()
-        elif command == "-chgadmin":
-            monitor.change_admin()
         elif command == "-pid":
             monitor.pid()
         elif command.lower() == "exit":
             break
         else:
-            con=colored("\n\t\tUnknown command!\n\tTry -help for help or 'exit' to quit.\n",color="yellow")
+            con=colored("\n\t\tUnknown command!\n\tTry","yellow" ) + colored("-help","magenta") + colored("for help or 'exit' to quit.\n",color="yellow")
             t.echo(con)
 
 
@@ -51,7 +49,12 @@ def pre_info():   #Info displayed at the beging of the tool
 
 
 def help():
-    t.echo("\n\nhelping\n\n")
+    t.echo(colored("\n\n\t-deploy","magenta") + colored("\t\t-\tTo deploy the honeytoken in any desired directory location."))
+    t.echo(colored("\t-start","magenta") + colored(" \t\t-\tTo start the honeytoken monitoring process."))
+    t.echo(colored("\t-status","magenta") + colored("\t\t-\tTo Check the status of the honeytoken monitoring."))
+    t.echo(colored("\t-pid","magenta") + colored("   \t\t-\tTo retrieve the process ID for the honeytoken monitoring."))
+    t.echo(colored("\t-stop","magenta") + colored("  \t\t-\tTo stop the honeytoken monitoring process."))
+    t.echo(colored("\texit","magenta") + colored("  \t\t-\tTo exit the tool.\n\n"))
 
 
 @app.command()
