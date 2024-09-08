@@ -9,18 +9,24 @@ from datetime import datetime
 import signal
 from watchdog.observers import Observer    #pip install watchdog
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
+import action
+import deploy
 
 state_log='/home/jones/Minor/h.monitor_state.pkl'
-admin='jones'
+admin="jones"
 path=""
 f_pid=0
 log_path="/home/jones/Minor/HoneyToken/log_status.log"
 
 def change_admin():
+    global admin
     t.echo(colored("\n\tAdmin name will reset to default after exiting the program.\n","yellow"))
     t.echo(colored("\nCurrent admin: ",'yellow') + colored(f"{admin}\n","green"))
     new=input("New admin: ")
-    admin=new
+    if new.lower() == "exit":
+        return 0
+    else:
+        admin=new
 
 
 def get_usr(path):   
@@ -29,15 +35,18 @@ def get_usr(path):
         for line in res.stdout.splitlines():
             if path in line:
                 p=line.split()
-                return p[2]
+                return p[1],p[2]
     except Exception as e:
-            print(e)
+            t.echo(colored(e,"red"))
     return None
 
 
 
 
 def add_log(user, event, path):
+    if not os.path.exists(log_path):
+        open(log_path,"w").close()
+        
     with open(log_path,"a") as f:
         time=datetime.now().strftime('%d-%m-%Y %H:%M:%S')
         f.write(f"\n{time} Event- {event} by {user} in {path}")
@@ -47,17 +56,17 @@ def add_log(user, event, path):
 class Honeytoken(FileSystemEventHandler):
     def process_event(self, event):
         f_path=event.src_path
-        t.echo(f"\n\t{f_path}\n")
-        global path
-        user=get_usr(path)
+        global path 
+        pid,user=get_usr(path)
         add_log(user,event.event_type,event.src_path)
         if user:
             if user != admin:
-                t.echo("\n\t\tAlert\n")
-            else:
-                t.echo("\n\t\tSuccess\n")
+                action.stop(pid)
+                action.move(str(f_path))
+                action.hnyTok_bot()
         else:
-            t.echo("\nError\n")
+            t.echo(colored("\nError in getting user!\n","red"))
+        
 
     def on_modified(self, event):
         self.process_event(event)
@@ -92,10 +101,15 @@ def start_monitoring():
     while True:
         while True:
             global path
-            path=input("Path of the directory (without file name): ")
-            p_input=Path(path)
-            if path == "exit":
-                break
+            pat=input("Path of the directory (without file name): ")
+            if pat == "-deploy":
+                deploy.honeytoken_deploy()
+            elif pat.lower() == "exit":
+                return 0
+            else:
+                global path
+                path = pat
+                p_input=Path(pat)
 
             if p_input.is_dir():
                 if p_input.is_absolute():
@@ -107,12 +121,14 @@ def start_monitoring():
 
         while True:
             fn=input("File name: ")
-
-            if Path(fn).suffix in ['.txt','.conf','.ini','.docx','.sql','.pem','.env','.json','.log']:
-                f_path=os.path.join(p_input,fn)
-                break
+            if fn.lower() == "exit":
+                return 0
             else:
-                t.echo(colored("\n\t\tPlease provide a valid file name\n","yellow"))
+                if Path(fn).suffix in ['.txt','.conf','.ini','.docx','.sql','.pem','.env','.json','.log']:
+                    f_path=os.path.join(p_input,fn)
+                    break
+                else:
+                    t.echo(colored("\n\t\tPlease provide a valid file name\n","yellow"))
 
         if os.path.exists(f_path):
             pid=os.fork()                             #start of daemon process
@@ -194,5 +210,3 @@ def pid():
             os.remove(state_log)
     else:
         t.echo(colored("\nNo monitoring details found\n","yellow"))
-
-
