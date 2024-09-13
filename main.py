@@ -3,6 +3,7 @@ from art import text2art #pip install art
 from termcolor import colored #pip install termcolor
 import deploy
 import monitor
+import action
 
 app=t.Typer()
 
@@ -23,11 +24,22 @@ def intractive_mode():
             monitor.check_monitoring_status()
         elif command == "-pid":
             monitor.pid()
+        elif command == "clear":
+            action.clear()
+        elif command == "random":
+            random()
         elif command.lower() == "exit":
             break
         else:
             con=colored("\n\t\tUnknown command!\n\tTry","yellow" ) + colored("-help","magenta") + colored("for help or 'exit' to quit.\n",color="yellow")
             t.echo(con)
+
+def random():
+    art=text2art("h.Tok","random")
+    t.echo(colored(f"\n\t{art}","green"))
+    text1=colored("\t  Dynamic Honeytoken Monitoring\n",color="light_red")
+    t.echo(text1)
+
 
 
 def pre_info():   #Info displayed at the beging of the tool
@@ -54,7 +66,10 @@ def help():
     t.echo(colored("\t-status","magenta") + colored("\t\t-\tTo Check the status of the honeytoken monitoring."))
     t.echo(colored("\t-pid","magenta") + colored("   \t\t-\tTo retrieve the process ID for the honeytoken monitoring."))
     t.echo(colored("\t-stop","magenta") + colored("  \t\t-\tTo stop the honeytoken monitoring process."))
-    t.echo(colored("\texit","magenta") + colored("  \t\t-\tTo exit the tool.\n\n"))
+    t.echo(colored("\texit","magenta") + colored("   \t\t-\tTo exit the tool."))
+    t.echo(colored("\tclear","magenta") + colored("  \t\t-\tTo exit clear the screen."))
+    t.echo(colored("\trandom","magenta") + colored(" \t\t-\tTo display random intro.\n\n"))
+
 
 
 @app.command()
