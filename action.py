@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 
-destination = "/home/jones/Minor/.dump"
+destination = "" #desstination path
 def stop(pid):
     pid=int(pid)
     os.kill(pid,9)
@@ -14,7 +14,7 @@ def stop(pid):
 def move(path):
     try:
         p=Path(path)
-        if p.parent.name in ['home','jones']:
+        if p.parent.name in ['home','']: #' ' fill the user name
             shutil.move(path,destination)
         elif p.parent.name in ['temp','Downloads','Desktop','Music','Templates','Videos','Pictures','Public','Documents']:
             base=Path(destination)/str(p.parent.name)
@@ -25,16 +25,16 @@ def move(path):
         else:
             shutil.move(str(p.parent),destination)
     except FileNotFoundError :
-        token="7260439440:AAE-jXdEPf385_nuxBgQpMUJ04YBtEkrX3k"
-        id="5106130605"
+        token=""#give the telegram bot token
+        id=""#give the chat id
         msg=f"The file got deleted"
         url=f"https://api.telegram.org/bot{token}/sendMessage?chat_id={id}&text={msg}"
         requests.get(url)        
 
 
 def hnyTok_bot():
-    token="7260439440:AAE-jXdEPf385_nuxBgQpMUJ04YBtEkrX3k"
-    id="5106130605"
+    token=""#give the telegram bot token
+    id=#give the chat id
     msg=f"Alert!!\n{get_msg()}"
     url=f"https://api.telegram.org/bot{token}/sendMessage?chat_id={id}&text={msg}"
     requests.get(url)
