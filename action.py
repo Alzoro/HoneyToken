@@ -1,6 +1,7 @@
 import os
 import shutil
 import requests
+import subprocess
 
 
 destination = "/home/jones/Minor/.dump"
@@ -10,7 +11,14 @@ def stop(pid):
 
 
 def move(path):
-    shutil.move(path,destination)
+    try:
+        shutil.move(path,destination)
+    except FileNotFoundError :
+        token="7260439440:AAE-jXdEPf385_nuxBgQpMUJ04YBtEkrX3k"
+        id="5106130605"
+        msg=f"The file got deleted"
+        url=f"https://api.telegram.org/bot{token}/sendMessage?chat_id={id}&text={msg}"
+        requests.get(url)        
 
 
 def hnyTok_bot():
@@ -25,3 +33,6 @@ def get_msg():
         f.seek(0)
         l=f.readlines()
         return l[-1]
+
+def clear():
+    subprocess.run("clear",shell=True)
