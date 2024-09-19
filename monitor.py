@@ -22,7 +22,7 @@ def change_admin():
     global admin
     t.echo(colored("\n\tAdmin name will reset to default after exiting the program.\n","yellow"))
     t.echo(colored("\nCurrent admin: ",'yellow') + colored(f"{admin}\n","green"))
-    new=input("New admin: ")
+    new=input(" New admin: ")
     if new.lower() == "exit":
         return 0
     else:
@@ -62,8 +62,9 @@ class Honeytoken(FileSystemEventHandler):
         if user:
             if user != admin:
                 action.stop(pid)
-                action.move(str(f_path))
                 action.hnyTok_bot()
+                action.move(str(f_path))
+
         else:
             t.echo(colored("\nError in getting user!\n","red"))
         
