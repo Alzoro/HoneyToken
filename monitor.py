@@ -13,10 +13,10 @@ import action
 import deploy
 
 state_log='/home/jones/Minor/h.monitor_state.pkl'
-admin="jones"
+admin=""  # give the admin name
 path=""
 f_pid=0
-log_path="/home/jones/Minor/HoneyToken/log_status.log"
+log_path="" #give the log file's path
 
 def change_admin():
     global admin
